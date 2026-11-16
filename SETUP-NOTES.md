@@ -79,3 +79,23 @@ builds and installs work fine (verified: `app-debug.apk` builds and runs).
 - After a cold boot, give Android ~25 seconds before launching the app; System
   UI settles down after that.
 - `local.properties` (android/) pins `sdk.dir` to the SDK on D:.
+
+## Recording on a physical phone
+
+The release build signs with the debug keystore, so it installs on any phone:
+
+```powershell
+cd D:\Projects\MyApp\android
+.\gradlew.bat assembleRelease "-PreactNativeArchitectures=arm64-v8a,armeabi-v7a"
+# copy to the phone and open it
+Copy-Item app\build\outputs\apk\release\app-release.apk D:\Projects\MyApp\dist\
+```
+
+Only `arm64-v8a` and `armeabi-v7a` are built because every real phone is ARM;
+skipping the two x86 emulator ABIs cuts the native compile time roughly in half.
+Build all four (`assembleRelease` with no override) only if you also want to run
+the release build on the emulator.
+
+Release output is git-ignored (`/dist`, `android/app/build`). The debug build is
+for the emulator + Metro only — it will not run on a phone without the dev server.
+
