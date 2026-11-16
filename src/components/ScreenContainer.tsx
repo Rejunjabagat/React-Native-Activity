@@ -17,10 +17,14 @@ type Props = {
 };
 
 /**
- * Shared page shell: safe-area aware background + the horizontal padding
- * that every screen uses, so padding never drifts between screens.
+ * Shared page shell: safe-area aware background plus the horizontal padding
+ * every screen uses, so the measure of text is identical across screens.
  */
-export function ScreenContainer({ children, scroll = true, contentStyle }: Props) {
+export function ScreenContainer({
+  children,
+  scroll = true,
+  contentStyle,
+}: Props) {
   const { colors } = useAppTheme();
 
   if (!scroll) {
@@ -56,7 +60,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flexGrow: 1,
-    paddingHorizontal: 18,
-    paddingBottom: 32,
+    paddingHorizontal: 20,
+    paddingBottom: 40,
   },
 });

@@ -5,7 +5,7 @@ import { StyleSheet, Text, TextInput, View } from 'react-native';
 import { AppHeader } from '../components/AppHeader';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { ScreenContainer } from '../components/ScreenContainer';
-import { SectionTitle } from '../components/SectionTitle';
+import { SectionHeading } from '../components/SectionHeading';
 import { SegmentedControl } from '../components/SegmentedControl';
 import { ThemeSwitch } from '../components/ThemeSwitch';
 import type { RootStackParamList } from '../navigation/types';
@@ -33,103 +33,111 @@ export function SettingsScreen({ navigation }: Props) {
       return;
     }
 
-    const timer = setTimeout(() => setNotice(null), 2200);
+    const timer = setTimeout(() => setNotice(null), 2400);
     return () => clearTimeout(timer);
   }, [notice]);
 
   const handleReset = () => {
     resetPreferences();
-    setNotice('Preferences restored to defaults');
+    setNotice('Defaults restored');
   };
 
   return (
     <ScreenContainer>
       <AppHeader
+        kicker="Preferences"
         title="Settings"
-        subtitle="Global preferences for the whole app"
+        subtitle="One set of values, read by every screen in the app."
         onBack={navigation.goBack}
       />
 
-      <SectionTitle title="Profile" hint="Updates the dashboard instantly" />
-      <View
-        style={[
-          styles.card,
-          { backgroundColor: colors.surface, borderColor: colors.border },
-        ]}
-      >
-        <Field
-          label="Display name"
-          value={profile.name}
-          placeholder="Your name"
-          onChangeText={name => updateProfile({ name })}
-        />
-        <View style={[styles.divider, { backgroundColor: colors.border }]} />
-        <Field
-          label="Course / section"
-          value={profile.course}
-          placeholder="BS Computer Science"
-          onChangeText={course => updateProfile({ course })}
-        />
-      </View>
+      <SectionHeading
+        index="01"
+        title="Identity"
+        hint="Appears in the dashboard greeting"
+      />
 
-      <SectionTitle title="Appearance" hint="Theme is shared across all screens" />
-      <View
-        style={[
-          styles.card,
-          { backgroundColor: colors.surface, borderColor: colors.border },
-        ]}
-      >
-        <SegmentedControl
-          options={[
-            { value: 'light', label: 'Light' },
-            { value: 'dark', label: 'Dark' },
-          ]}
-          value={mode}
-          onChange={next => setMode(next as ThemeMode)}
-        />
+      <Field
+        label="Display name"
+        value={profile.name}
+        placeholder="Your name"
+        maxLength={32}
+        onChangeText={name => updateProfile({ name })}
+      />
+      <Field
+        label="Course and section"
+        value={profile.course}
+        placeholder="BSCS 4-A"
+        maxLength={28}
+        onChangeText={course => updateProfile({ course })}
+      />
 
-        <View style={styles.switchRow}>
-          <View style={styles.switchText}>
-            <Text style={[styles.switchLabel, { color: colors.text }]}>
-              Dark mode
-            </Text>
-            <Text style={[styles.switchHint, { color: colors.textMuted }]}>
-              {isDark ? 'Dark palette is active' : 'Light palette is active'}
-            </Text>
-          </View>
-          <ThemeSwitch value={isDark} onChange={toggleTheme} />
+      <SectionHeading
+        index="02"
+        title="Appearance"
+        hint="Switches instantly, app-wide"
+      />
+
+      <SegmentedControl
+        options={[
+          { value: 'light', label: 'Light' },
+          { value: 'dark', label: 'Dark' },
+        ]}
+        value={mode}
+        onChange={next => setMode(next as ThemeMode)}
+      />
+
+      <View style={[styles.switchRow, { borderTopColor: colors.border }]}>
+        <View style={styles.switchText}>
+          <Text style={[styles.switchLabel, { color: colors.text }]}>
+            Dark mode
+          </Text>
+          <Text style={[styles.switchHint, { color: colors.textMuted }]}>
+            {isDark ? 'Ink palette' : 'Paper palette'}
+          </Text>
         </View>
+        <ThemeSwitch value={isDark} onChange={toggleTheme} />
       </View>
 
-      <SectionTitle title="Live preview" />
+      <SectionHeading
+        index="03"
+        title="Preview"
+        hint="What the dashboard header renders"
+      />
+
       <View
         style={[
           styles.preview,
-          { backgroundColor: colors.surfaceAlt, borderColor: colors.border },
+          {
+            backgroundColor: colors.surface,
+            borderColor: colors.border,
+            borderLeftColor: colors.primary,
+          },
         ]}
       >
-        <Text style={[styles.previewEyebrow, { color: colors.textMuted }]}>
-          HOME DASHBOARD
+        <Text style={[styles.previewKicker, { color: colors.textMuted }]}>
+          Dashboard
         </Text>
-        <Text style={[styles.previewName, { color: colors.text }]}>
+        <Text
+          style={[styles.previewName, { color: colors.text }]}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.7}
+        >
           {profile.name || 'Student'}
         </Text>
         <Text style={[styles.previewCourse, { color: colors.textMuted }]}>
-          {profile.course || 'React Native'}
+          {profile.course || 'BSCS'} · Activity 05
         </Text>
       </View>
 
-      <SectionTitle title="About" />
-      <View
-        style={[
-          styles.card,
-          { backgroundColor: colors.surface, borderColor: colors.border },
-        ]}
-      >
-        <Row label="Application" value="Activity #5 — Master Dashboard" />
-        <Row label="React Native" value="0.88.1" />
-        <Row label="Architecture" value="New Architecture (Fabric)" />
-        <Row label="Global state" value="React Context API" last />
+      <SectionHeading index="04" title="About" />
+
+      <View style={[styles.table, { borderTopColor: colors.border }]}>
+        <Row label="Application" value="Activity 05 shell" />
+        <Row label="React Native" value="0.88.1 · Fabric" />
+        <Row label="Navigation" value="native-stack v7" />
+        <Row label="Global state" value="Context API" last />
       </View>
 
       <View style={styles.footer}>
@@ -152,10 +160,18 @@ type FieldProps = {
   label: string;
   value: string;
   placeholder: string;
+  maxLength: number;
   onChangeText: (value: string) => void;
 };
 
-function Field({ label, value, placeholder, onChangeText }: FieldProps) {
+/** Underlined text field — no boxes, so the page keeps its report-like rhythm. */
+function Field({
+  label,
+  value,
+  placeholder,
+  maxLength,
+  onChangeText,
+}: FieldProps) {
   const { colors } = useAppTheme();
 
   return (
@@ -171,14 +187,13 @@ function Field({ label, value, placeholder, onChangeText }: FieldProps) {
         selectionColor={colors.primary}
         autoCapitalize="words"
         autoCorrect={false}
-        maxLength={32}
+        maxLength={maxLength}
         accessibilityLabel={label}
         style={[
           styles.input,
           {
             color: colors.text,
-            borderColor: colors.border,
-            backgroundColor: colors.surfaceAlt,
+            borderBottomColor: colors.border,
           },
         ]}
       />
@@ -201,10 +216,13 @@ function Row({
     <View
       style={[
         styles.row,
-        !last && { borderBottomWidth: 1, borderBottomColor: colors.border },
+        { borderBottomColor: colors.border },
+        last && styles.rowLast,
       ]}
     >
-      <Text style={[styles.rowLabel, { color: colors.textMuted }]}>{label}</Text>
+      <Text style={[styles.rowLabel, { color: colors.textMuted }]}>
+        {label}
+      </Text>
       <Text
         style={[styles.rowValue, { color: colors.text }]}
         numberOfLines={1}
@@ -216,37 +234,30 @@ function Row({
 }
 
 const styles = StyleSheet.create({
-  card: {
-    borderRadius: 18,
-    borderWidth: 1,
-    padding: 16,
-  },
   field: {
-    gap: 6,
+    marginBottom: 18,
   },
   fieldLabel: {
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 0.7,
+    fontFamily: 'monospace',
+    fontSize: 9,
+    letterSpacing: 1.2,
     textTransform: 'uppercase',
+    marginBottom: 2,
   },
   input: {
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 11,
-    fontSize: 15,
-    fontWeight: '600',
-  },
-  divider: {
-    height: 1,
-    marginVertical: 14,
+    fontFamily: 'serif',
+    fontSize: 17,
+    paddingVertical: 10,
+    paddingHorizontal: 0,
+    borderBottomWidth: 1,
   },
   switchRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    borderTopWidth: 1,
     marginTop: 16,
+    paddingTop: 16,
   },
   switchText: {
     flex: 1,
@@ -254,55 +265,75 @@ const styles = StyleSheet.create({
   },
   switchLabel: {
     fontSize: 14,
-    fontWeight: '700',
+    fontWeight: '600',
   },
   switchHint: {
-    fontSize: 11,
-    marginTop: 2,
+    fontFamily: 'monospace',
+    fontSize: 9,
+    letterSpacing: 0.9,
+    textTransform: 'uppercase',
+    marginTop: 3,
   },
   preview: {
-    borderRadius: 18,
+    borderRadius: 4,
     borderWidth: 1,
+    borderLeftWidth: 3,
     padding: 18,
   },
-  previewEyebrow: {
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 1,
+  previewKicker: {
+    fontFamily: 'monospace',
+    fontSize: 9,
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
+    marginBottom: 8,
   },
   previewName: {
-    fontSize: 22,
-    fontWeight: '800',
-    marginTop: 6,
+    fontFamily: 'serif',
+    fontSize: 24,
+    fontWeight: '700',
+    letterSpacing: -0.4,
   },
   previewCourse: {
-    fontSize: 12,
-    marginTop: 2,
+    fontFamily: 'monospace',
+    fontSize: 9,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    marginTop: 8,
+  },
+  table: {
+    borderTopWidth: 1,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 11,
-    gap: 12,
+    gap: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+  },
+  rowLast: {
+    borderBottomWidth: 0,
   },
   rowLabel: {
-    fontSize: 12,
-    fontWeight: '600',
+    fontFamily: 'monospace',
+    fontSize: 9,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
   },
   rowValue: {
-    fontSize: 12,
-    fontWeight: '700',
     flexShrink: 1,
+    fontSize: 12,
     textAlign: 'right',
   },
   footer: {
-    marginTop: 26,
+    marginTop: 28,
     gap: 12,
   },
   notice: {
+    fontFamily: 'monospace',
+    fontSize: 10,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
     textAlign: 'center',
-    fontSize: 12,
-    fontWeight: '600',
   },
 });

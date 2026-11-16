@@ -6,7 +6,7 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import { Appearance, StatusBar } from 'react-native';
+import { StatusBar } from 'react-native';
 
 import { darkColors, lightColors, type ThemeColors } from './colors';
 
@@ -28,9 +28,12 @@ export type ThemeContextValue = {
   resetPreferences: () => void;
 };
 
+/** Paper first: the light theme is the canonical look of the app. */
+const DEFAULT_MODE: ThemeMode = 'light';
+
 const DEFAULT_PROFILE: Profile = {
-  name: 'Ricks Jabagat',
-  course: 'BS Computer Science',
+  name: 'Rejun Q. Jabagat',
+  course: 'BSCS 4-A',
 };
 
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
@@ -41,9 +44,7 @@ type ThemeProviderProps = {
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
   // Global parameter #1 — Dark / Light theme.
-  const [mode, setMode] = useState<ThemeMode>(() =>
-    Appearance.getColorScheme() === 'light' ? 'light' : 'dark',
-  );
+  const [mode, setMode] = useState<ThemeMode>(DEFAULT_MODE);
 
   // Global parameter #2 — the user profile shown on the dashboard.
   const [profile, setProfile] = useState<Profile>(DEFAULT_PROFILE);
@@ -58,7 +59,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
 
   const resetPreferences = useCallback(() => {
     setProfile(DEFAULT_PROFILE);
-    setMode('dark');
+    setMode(DEFAULT_MODE);
   }, []);
 
   const isDark = mode === 'dark';

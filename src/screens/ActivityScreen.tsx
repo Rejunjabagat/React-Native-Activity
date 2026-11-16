@@ -3,9 +3,10 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { AppHeader } from '../components/AppHeader';
+import { MetricsStrip } from '../components/MetricsStrip';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { ScreenContainer } from '../components/ScreenContainer';
-import { SectionTitle } from '../components/SectionTitle';
+import { SectionHeading } from '../components/SectionHeading';
 import { getActivityById } from '../data/activities';
 import type { RootStackParamList } from '../navigation/types';
 import { useAppTheme } from '../theme/ThemeContext';
@@ -39,9 +40,9 @@ export function ActivityScreen({ navigation, route }: Props) {
   if (!activity) {
     return (
       <ScreenContainer>
-        <AppHeader title="Not found" onBack={navigation.goBack} />
-        <Text style={{ color: colors.textMuted }}>
-          This activity does not exist yet.
+        <AppHeader kicker="Activity" title="Not found" onBack={navigation.goBack} />
+        <Text style={[styles.body, { color: colors.textMuted }]}>
+          This entry does not exist yet.
         </Text>
       </ScreenContainer>
     );
@@ -50,58 +51,67 @@ export function ActivityScreen({ navigation, route }: Props) {
   return (
     <ScreenContainer>
       <AppHeader
-        title="Activity detail"
-        subtitle={activity.title}
+        kicker={`Activity ${activity.code}`}
+        title={activity.title}
+        subtitle={activity.subtitle}
         onBack={navigation.goBack}
       />
 
-      <View
-        style={[
-          styles.hero,
-          {
-            backgroundColor: colors.surface,
-            borderColor: colors.border,
-            borderLeftColor: activity.accent,
-          },
-        ]}
-      >
-        <View style={styles.heroTop}>
-          <View
-            style={[styles.iconWrap, { backgroundColor: `${activity.accent}22` }]}
-          >
-            <Text style={styles.icon}>{activity.icon}</Text>
-          </View>
-          <View
-            style={[styles.chip, { backgroundColor: `${activity.accent}22` }]}
-          >
-            <Text style={[styles.chipText, { color: activity.accent }]}>
-              {activity.status.toUpperCase()}
-            </Text>
-          </View>
-        </View>
+      <Text style={[styles.description, { color: colors.text }]}>
+        {activity.description}
+      </Text>
 
-        <Text style={[styles.title, { color: colors.text }]}>
-          {activity.title}
-        </Text>
-        <Text style={[styles.subtitle, { color: colors.textMuted }]}>
-          {activity.subtitle}
-        </Text>
-        <Text style={[styles.description, { color: colors.textMuted }]}>
-          {activity.description}
+      <View style={styles.metrics}>
+        <MetricsStrip
+          items={[
+            {
+              label: 'status',
+              value:
+                activity.status === 'current'
+                  ? 'Active'
+                  : activity.status === 'done'
+                    ? 'Done'
+                    : 'Next',
+              accent:
+                activity.status === 'done'
+                  ? colors.success
+                  : activity.status === 'current'
+                    ? colors.accent
+                    : undefined,
+            },
+            {
+              label: 'reviewed',
+              value: `${doneCount}/${requirements.length}`,
+            },
+            { label: 'time', value: formattedTime },
+          ]}
+        />
+      </View>
+
+      <SectionHeading
+        index="01"
+        title="Checklist"
+        hint="Tap a line to mark it reviewed"
+      />
+
+      <View style={styles.progressRow}>
+        <View style={[styles.track, { backgroundColor: colors.surfaceAlt }]}>
+          <View
+            style={[
+              styles.fill,
+              {
+                width: `${Math.round(progress * 100)}%`,
+                backgroundColor: colors.success,
+              },
+            ]}
+          />
+        </View>
+        <Text style={[styles.progressText, { color: colors.textMuted }]}>
+          {Math.round(progress * 100)}%
         </Text>
       </View>
 
-      <SectionTitle
-        title="Checklist"
-        hint={`${doneCount} of ${requirements.length} reviewed · ${formattedTime} on screen`}
-      />
-
-      <View
-        style={[
-          styles.checklist,
-          { backgroundColor: colors.surface, borderColor: colors.border },
-        ]}
-      >
+      <View>
         {requirements.map((item, index) => {
           const isChecked = !!checked[item];
 
@@ -112,20 +122,26 @@ export function ActivityScreen({ navigation, route }: Props) {
               accessibilityState={{ checked: isChecked }}
               accessibilityLabel={item}
               onPress={() =>
-                setChecked(current => ({ ...current, [item]: !current[item] }))
+                setChecked(previous => ({
+                  ...previous,
+                  [item]: !previous[item],
+                }))
               }
               style={({ pressed }) => [
-                styles.checkRow,
-                index !== requirements.length - 1 && {
-                  borderBottomWidth: 1,
+                styles.row,
+                {
                   borderBottomColor: colors.border,
+                  opacity: pressed ? 0.6 : 1,
                 },
-                { opacity: pressed ? 0.7 : 1 },
               ]}
             >
+              <Text style={[styles.rowIndex, { color: colors.textMuted }]}>
+                {String(index + 1).padStart(2, '0')}
+              </Text>
+
               <View
                 style={[
-                  styles.checkbox,
+                  styles.box,
                   {
                     borderColor: isChecked ? colors.primary : colors.border,
                     backgroundColor: isChecked
@@ -135,19 +151,18 @@ export function ActivityScreen({ navigation, route }: Props) {
                 ]}
               >
                 {isChecked ? (
-                  <Text
+                  <View
                     style={[
-                      styles.checkMark,
-                      { color: colors.primaryText },
+                      styles.boxMark,
+                      { backgroundColor: colors.primaryText },
                     ]}
-                  >
-                    ✓
-                  </Text>
+                  />
                 ) : null}
               </View>
+
               <Text
                 style={[
-                  styles.checkLabel,
+                  styles.rowLabel,
                   {
                     color: isChecked ? colors.textMuted : colors.text,
                     textDecorationLine: isChecked ? 'line-through' : 'none',
@@ -159,18 +174,6 @@ export function ActivityScreen({ navigation, route }: Props) {
             </Pressable>
           );
         })}
-
-        <View style={[styles.progressTrack, { backgroundColor: colors.surfaceAlt }]}>
-          <View
-            style={[
-              styles.progressFill,
-              {
-                width: `${Math.round(progress * 100)}%`,
-                backgroundColor: colors.success,
-              },
-            ]}
-          />
-        </View>
       </View>
 
       <View style={styles.actions}>
@@ -184,95 +187,67 @@ export function ActivityScreen({ navigation, route }: Props) {
 }
 
 const styles = StyleSheet.create({
-  hero: {
-    borderRadius: 20,
-    borderWidth: 1,
-    borderLeftWidth: 4,
-    padding: 18,
-  },
-  heroTop: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 14,
-  },
-  iconWrap: {
-    width: 46,
-    height: 46,
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  icon: {
-    fontSize: 22,
-  },
-  chip: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 999,
-  },
-  chipText: {
-    fontSize: 9,
-    fontWeight: '800',
-    letterSpacing: 0.8,
-  },
-  title: {
-    fontSize: 23,
-    fontWeight: '800',
-    letterSpacing: -0.3,
-  },
-  subtitle: {
-    fontSize: 13,
-    marginTop: 3,
-  },
   description: {
-    fontSize: 13,
-    lineHeight: 20,
-    marginTop: 12,
+    fontSize: 14,
+    lineHeight: 22,
+    marginTop: 18,
   },
-  checklist: {
-    borderRadius: 18,
-    borderWidth: 1,
-    paddingHorizontal: 14,
-    paddingTop: 4,
-    paddingBottom: 14,
+  metrics: {
+    marginTop: 22,
   },
-  checkRow: {
+  progressRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 13,
-    gap: 12,
+    gap: 10,
+    marginBottom: 4,
   },
-  checkbox: {
-    width: 22,
-    height: 22,
-    borderRadius: 7,
+  track: {
+    flex: 1,
+    height: 3,
+  },
+  fill: {
+    height: 3,
+  },
+  progressText: {
+    fontFamily: 'monospace',
+    fontSize: 10,
+    letterSpacing: 0.8,
+    fontVariant: ['tabular-nums'],
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+  },
+  rowIndex: {
+    fontFamily: 'monospace',
+    fontSize: 10,
+    letterSpacing: 0.8,
+    fontVariant: ['tabular-nums'],
+  },
+  box: {
+    width: 18,
+    height: 18,
     borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  checkMark: {
-    fontSize: 13,
-    fontWeight: '900',
-    lineHeight: 16,
+  boxMark: {
+    width: 8,
+    height: 8,
   },
-  checkLabel: {
+  rowLabel: {
     flex: 1,
     fontSize: 13,
     lineHeight: 19,
-    fontWeight: '600',
   },
-  progressTrack: {
-    height: 6,
-    borderRadius: 999,
-    marginTop: 10,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: 6,
-    borderRadius: 999,
+  body: {
+    fontSize: 14,
+    lineHeight: 21,
   },
   actions: {
-    marginTop: 22,
+    marginTop: 26,
   },
 });

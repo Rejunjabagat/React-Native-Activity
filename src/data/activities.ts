@@ -1,8 +1,8 @@
 export type Activity = {
   id: string;
+  code: string;
   title: string;
   subtitle: string;
-  icon: string;
   accent: string;
   status: 'done' | 'current' | 'upcoming';
   description: string;
@@ -12,99 +12,99 @@ export type Activity = {
 export const ACTIVITIES: Activity[] = [
   {
     id: 'activity-1',
+    code: '01',
     title: 'Environment Setup',
-    subtitle: 'RN CLI, JDK, Android SDK',
-    icon: '🧰',
-    accent: '#5B93FF',
+    subtitle: 'RN CLI · JDK 17 · Android SDK',
+    accent: '#5F7D6E',
     status: 'done',
     description:
-      'Installed and verified the full React Native toolchain: Node, JDK 17, Android SDK, emulator and a hardware accelerator.',
+      'Installed and checked the toolchain: Node, JDK 17, Android SDK, an emulator and a hardware accelerator. A debug build installs and runs on the emulator.',
     requirements: [
       'Node.js and npm installed',
-      'JDK 17 configured through JAVA_HOME',
+      'JDK 17 set through JAVA_HOME',
       'Android SDK with platform 36',
-      'Emulator boots and installs a debug build',
+      'Emulator boots and installs the build',
     ],
   },
   {
     id: 'activity-2',
+    code: '02',
     title: 'Core Components',
-    subtitle: 'View, Text, Image, Pressable',
-    icon: '🧩',
-    accent: '#12B76A',
+    subtitle: 'View · Text · Image · Pressable',
+    accent: '#6B7F55',
     status: 'done',
     description:
-      'Practised the declarative building blocks of React Native and composed them into small, reusable components.',
+      'Built small screens out of the core components and moved every repeated piece into its own file with typed props.',
     requirements: [
-      'Text, View and Image composed in a layout',
+      'Text, View and Image used in a layout',
       'Pressable with pressed-state feedback',
       'Props typed with TypeScript',
-      'Styles kept out of the component body',
+      'Styles kept outside the component body',
     ],
   },
   {
     id: 'activity-3',
-    title: 'Flexbox Layouts',
-    subtitle: 'flex, direction, alignment',
-    icon: '📐',
-    accent: '#FF7A59',
+    code: '03',
+    title: 'Flexbox Layout',
+    subtitle: 'flex · direction · alignment',
+    accent: '#9E512C',
     status: 'done',
     description:
-      'Built layout exercises that rely on Flexbox only — no fixed pixel widths — so the UI adapts to any screen.',
+      'Rebuilt the layouts with Flexbox only, no fixed widths, then checked them at several screen sizes with nothing clipped at the edges.',
     requirements: [
-      'flexDirection and flexWrap used deliberately',
+      'flexDirection and flexWrap used on purpose',
       'justifyContent and alignItems control spacing',
-      'ScrollView prevents vertical overflow',
+      'ScrollView stops vertical overflow',
       'Layout survives rotation without clipping',
     ],
   },
   {
     id: 'activity-4',
-    title: 'State & Events',
-    subtitle: 'useState, useEffect, lists',
-    icon: '⚡',
-    accent: '#B26BFF',
+    code: '04',
+    title: 'State and Events',
+    subtitle: 'useState · useEffect · lists',
+    accent: '#8A6A3B',
     status: 'done',
     description:
-      'Local, screen-specific interactions driven by hooks: counters, toggles, form drafts and side effects.',
+      'Local interaction on one screen: counters, a controlled text field, a list with stable keys and a timer that cleans itself up.',
     requirements: [
       'useState for local screen state',
       'useEffect for lifecycle side effects',
-      'FlatList / map with stable keys',
+      'List rendered with stable keys',
       'Controlled TextInput with validation',
     ],
   },
   {
     id: 'activity-5',
-    title: 'Navigation & Global State',
-    subtitle: 'Multi-screen app, Context API',
-    icon: '🧭',
-    accent: '#2F6BFF',
+    code: '05',
+    title: 'Navigation and Global State',
+    subtitle: 'Stack navigation · Context API',
+    accent: '#1F4B3E',
     status: 'current',
     description:
-      'The master dashboard: stack navigation, a reusable component library, a responsive card grid, and global theme + profile state shared across every screen.',
+      'The shell for the rest of the semester. Three screens on a native stack, a small component library, a grid that re-flows by width, and the theme plus profile kept in one context.',
     requirements: [
       'Multi-screen navigation with a Home dashboard',
-      'Reusable components (cards, buttons, headers)',
-      'Responsive Flexbox grid, no overflow on any size',
-      'React Context API for the dark / light theme',
-      'Theme and profile name update instantly everywhere',
+      'Reusable cards, buttons and headers',
+      'Flexbox grid with no overflow at any width',
+      'React Context API holds the theme',
+      'Theme and profile name update everywhere at once',
     ],
   },
   {
     id: 'final-project',
+    code: '06',
     title: 'Final Project',
     subtitle: 'Compilation app',
-    icon: '🎓',
-    accent: '#F5B301',
+    accent: '#5B5B4F',
     status: 'upcoming',
     description:
-      'This dashboard becomes the shell for the final requirement: every future laboratory activity is wired in as its own screen.',
+      'The same dashboard becomes the entry point for the final requirement: each later activity is added as a screen behind the index.',
     requirements: [
       'All activities reachable from one dashboard',
-      'Consistent design system across screens',
+      'One design language across screens',
       'Global settings applied app-wide',
-      'Source repository and demo recording submitted',
+      'Repository and demo recording submitted',
     ],
   },
 ];

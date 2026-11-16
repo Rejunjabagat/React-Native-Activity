@@ -10,6 +10,7 @@ type Props = {
   disabled?: boolean;
 };
 
+/** Full-width action button — square corners, monospaced label. */
 export function PrimaryButton({
   label,
   onPress,
@@ -30,9 +31,9 @@ export function PrimaryButton({
       style={({ pressed }) => [
         styles.button,
         {
-          backgroundColor: isPrimary ? colors.primary : colors.surfaceAlt,
+          backgroundColor: isPrimary ? colors.primary : 'transparent',
           borderColor: isPrimary ? colors.primary : colors.border,
-          opacity: disabled ? 0.45 : pressed ? 0.82 : 1,
+          opacity: disabled ? 0.45 : pressed ? 0.75 : 1,
         },
       ]}
     >
@@ -50,16 +51,18 @@ export function PrimaryButton({
 
 const styles = StyleSheet.create({
   button: {
-    borderRadius: 14,
+    borderRadius: 4,
     borderWidth: 1,
-    paddingVertical: 13,
-    paddingHorizontal: 18,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
     alignItems: 'center',
     justifyContent: 'center',
   },
   label: {
-    fontSize: 14,
-    fontWeight: '700',
-    letterSpacing: 0.2,
+    fontFamily: 'monospace',
+    fontSize: 12,
+    fontWeight: '600',
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
   },
 });

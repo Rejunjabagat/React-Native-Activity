@@ -1,69 +1,79 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { IconButton } from './IconButton';
+import { TextButton } from './TextButton';
 import { useAppTheme } from '../theme/ThemeContext';
 
 type Props = {
+  kicker?: string;
   title: string;
   subtitle?: string;
   onBack?: () => void;
   right?: React.ReactNode;
 };
 
-/** Screen header with an optional back button and a right-hand action slot. */
-export function AppHeader({ title, subtitle, onBack, right }: Props) {
+/** Screen masthead: optional back button, serif title, monospace subtitle. */
+export function AppHeader({ kicker, title, subtitle, onBack, right }: Props) {
   const { colors } = useAppTheme();
 
   return (
-    <View style={styles.row}>
-      {onBack ? (
-        <IconButton icon="←" label="Go back" onPress={onBack} />
-      ) : null}
-
-      <View style={[styles.textBlock, onBack && styles.textBlockWithBack]}>
-        <Text
-          style={[styles.title, { color: colors.text }]}
-          numberOfLines={1}
-          accessibilityRole="header"
-        >
-          {title}
-        </Text>
-        {subtitle ? (
-          <Text style={[styles.subtitle, { color: colors.textMuted }]}>
-            {subtitle}
-          </Text>
-        ) : null}
+    <View style={styles.wrap}>
+      <View style={styles.topRow}>
+        {onBack ? <TextButton label="Back" size="sm" onPress={onBack} /> : <View />}
+        {right}
       </View>
 
-      {right ? <View style={styles.right}>{right}</View> : null}
+      {kicker ? (
+        <Text style={[styles.kicker, { color: colors.textMuted }]}>
+          {kicker}
+        </Text>
+      ) : null}
+
+      <Text
+        style={[styles.title, { color: colors.text }]}
+        numberOfLines={2}
+        accessibilityRole="header"
+      >
+        {title}
+      </Text>
+
+      {subtitle ? (
+        <Text style={[styles.subtitle, { color: colors.textMuted }]}>
+          {subtitle}
+        </Text>
+      ) : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  row: {
+  wrap: {
+    paddingTop: 6,
+  },
+  topRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingTop: 6,
-    paddingBottom: 10,
+    justifyContent: 'space-between',
+    minHeight: 30,
+    marginBottom: 20,
   },
-  textBlock: {
-    flex: 1,
-  },
-  textBlockWithBack: {
-    paddingLeft: 12,
+  kicker: {
+    fontFamily: 'monospace',
+    fontSize: 10,
+    letterSpacing: 1.6,
+    textTransform: 'uppercase',
+    marginBottom: 8,
   },
   title: {
-    fontSize: 20,
-    fontWeight: '800',
-    letterSpacing: -0.2,
+    fontFamily: 'serif',
+    fontSize: 32,
+    fontWeight: '700',
+    letterSpacing: -0.4,
+    lineHeight: 38,
   },
   subtitle: {
-    fontSize: 12,
-    marginTop: 2,
-  },
-  right: {
-    marginLeft: 12,
+    fontSize: 13,
+    lineHeight: 19,
+    marginTop: 6,
   },
 });

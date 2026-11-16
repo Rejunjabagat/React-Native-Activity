@@ -14,18 +14,13 @@ type Props = {
   onChange: (value: string) => void;
 };
 
-/** Pill-style single-choice control (used for Light / Dark). */
+/** Two-up selector with square corners, used for the theme choice. */
 export function SegmentedControl({ options, value, onChange }: Props) {
   const { colors } = useAppTheme();
 
   return (
-    <View
-      style={[
-        styles.track,
-        { backgroundColor: colors.surfaceAlt, borderColor: colors.border },
-      ]}
-    >
-      {options.map(option => {
+    <View style={[styles.track, { borderColor: colors.border }]}>
+      {options.map((option, index) => {
         const active = option.value === value;
 
         return (
@@ -37,16 +32,15 @@ export function SegmentedControl({ options, value, onChange }: Props) {
             onPress={() => onChange(option.value)}
             style={[
               styles.segment,
-              active && {
-                backgroundColor: colors.surface,
-                borderColor: colors.border,
-              },
+              index > 0 && styles.segmentDivider,
+              index > 0 && { borderLeftColor: colors.border },
+              active && { backgroundColor: colors.primary },
             ]}
           >
             <Text
               style={[
                 styles.label,
-                { color: active ? colors.text : colors.textMuted },
+                { color: active ? colors.primaryText : colors.textMuted },
               ]}
             >
               {option.label}
@@ -61,22 +55,24 @@ export function SegmentedControl({ options, value, onChange }: Props) {
 const styles = StyleSheet.create({
   track: {
     flexDirection: 'row',
-    borderRadius: 14,
+    borderRadius: 4,
     borderWidth: 1,
-    padding: 4,
-    gap: 4,
+    overflow: 'hidden',
   },
   segment: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 9,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: 'transparent',
+    paddingVertical: 11,
+  },
+  segmentDivider: {
+    borderLeftWidth: 1,
   },
   label: {
-    fontSize: 13,
-    fontWeight: '700',
+    fontFamily: 'monospace',
+    fontSize: 11,
+    fontWeight: '600',
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
   },
 });
