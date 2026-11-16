@@ -73,6 +73,9 @@ src/
    ├─ HomeScreen.tsx            masthead, appearance control, focus card, index grid
    ├─ ActivityScreen.tsx        activity detail, checklist, progress, timer
    └─ SettingsScreen.tsx        identity, appearance, preview, about
+__tests__/
+├─ theme-context.test.tsx       global state: defaults, toggle, patch, reset
+└─ screens.test.tsx             rendering + cross-screen update + checklist
 ```
 
 ### Global state flow
@@ -138,9 +141,17 @@ Copy that file to the phone, allow install from the file manager, and open
 Quality gates used:
 
 ```powershell
-npx tsc --noEmit      # 0 errors
+npx tsc --noEmit        # 0 errors
 npx eslint src App.tsx  # 0 errors
+npm test                # 7 tests, 2 suites
 ```
+
+The Jest suite (`__tests__/`) covers the parts of the brief that are easy to
+claim and hard to show: it renders Home and Settings inside one provider, types
+a new name into the Settings field, and asserts that the dashboard greeting
+changes — the global-state requirement proved without a screen recording. It
+also checks the theme switch, the profile patch, reset behaviour and the
+checklist progress calculation.
 
 ---
 
