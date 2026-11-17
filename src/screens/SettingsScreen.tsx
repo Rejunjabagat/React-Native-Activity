@@ -1,60 +1,32 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { AppHeader } from '../components/AppHeader';
-import { PrimaryButton } from '../components/PrimaryButton';
 import { ScreenContainer } from '../components/ScreenContainer';
 import { SectionHeading } from '../components/SectionHeading';
 import { SegmentedControl } from '../components/SegmentedControl';
-import { ThemeSwitch } from '../components/ThemeSwitch';
 import type { RootStackParamList } from '../navigation/types';
 import { useAppTheme, type ThemeMode } from '../theme/ThemeContext';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
 
 export function SettingsScreen({ navigation }: Props) {
-  const {
-    colors,
-    mode,
-    isDark,
-    setMode,
-    toggleTheme,
-    profile,
-    updateProfile,
-    resetPreferences,
-  } = useAppTheme();
-
-  // Local, screen-specific interaction state (useState + useEffect).
-  const [notice, setNotice] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!notice) {
-      return;
-    }
-
-    const timer = setTimeout(() => setNotice(null), 2400);
-    return () => clearTimeout(timer);
-  }, [notice]);
-
-  const handleReset = () => {
-    resetPreferences();
-    setNotice('Defaults restored');
-  };
+  const { colors, mode, setMode, profile, updateProfile } = useAppTheme();
 
   return (
     <ScreenContainer>
       <AppHeader
         kicker="Preferences"
         title="Settings"
-        subtitle="One set of values, read by every screen in the app."
+        subtitle="The values on this screen are shared by every other screen."
         onBack={navigation.goBack}
       />
 
       <SectionHeading
         index="01"
-        title="Identity"
-        hint="Appears in the dashboard greeting"
+        title="Profile"
+        hint="Shown on the dashboard"
       />
 
       <Field
@@ -74,8 +46,8 @@ export function SettingsScreen({ navigation }: Props) {
 
       <SectionHeading
         index="02"
-        title="Appearance"
-        hint="Switches instantly, app-wide"
+        title="Theme"
+        hint="Changes the whole app immediately"
       />
 
       <SegmentedControl
@@ -87,23 +59,7 @@ export function SettingsScreen({ navigation }: Props) {
         onChange={next => setMode(next as ThemeMode)}
       />
 
-      <View style={[styles.switchRow, { borderTopColor: colors.border }]}>
-        <View style={styles.switchText}>
-          <Text style={[styles.switchLabel, { color: colors.text }]}>
-            Dark mode
-          </Text>
-          <Text style={[styles.switchHint, { color: colors.textMuted }]}>
-            {isDark ? 'Ink palette' : 'Paper palette'}
-          </Text>
-        </View>
-        <ThemeSwitch value={isDark} onChange={toggleTheme} />
-      </View>
-
-      <SectionHeading
-        index="03"
-        title="Preview"
-        hint="What the dashboard header renders"
-      />
+      <SectionHeading index="03" title="Dashboard preview" />
 
       <View
         style={[
@@ -127,30 +83,8 @@ export function SettingsScreen({ navigation }: Props) {
           {profile.name || 'Student'}
         </Text>
         <Text style={[styles.previewCourse, { color: colors.textMuted }]}>
-          {profile.course || 'BSCS'} · Activity 05
+          {profile.course || 'BSCS'}
         </Text>
-      </View>
-
-      <SectionHeading index="04" title="About" />
-
-      <View style={[styles.table, { borderTopColor: colors.border }]}>
-        <Row label="Application" value="Activity 05 shell" />
-        <Row label="React Native" value="0.88.1 · Fabric" />
-        <Row label="Navigation" value="native-stack v7" />
-        <Row label="Global state" value="Context API" last />
-      </View>
-
-      <View style={styles.footer}>
-        <PrimaryButton
-          label="Reset preferences"
-          variant="secondary"
-          onPress={handleReset}
-        />
-        {notice ? (
-          <Text style={[styles.notice, { color: colors.success }]}>
-            {notice}
-          </Text>
-        ) : null}
       </View>
     </ScreenContainer>
   );
@@ -201,38 +135,6 @@ function Field({
   );
 }
 
-function Row({
-  label,
-  value,
-  last = false,
-}: {
-  label: string;
-  value: string;
-  last?: boolean;
-}) {
-  const { colors } = useAppTheme();
-
-  return (
-    <View
-      style={[
-        styles.row,
-        { borderBottomColor: colors.border },
-        last && styles.rowLast,
-      ]}
-    >
-      <Text style={[styles.rowLabel, { color: colors.textMuted }]}>
-        {label}
-      </Text>
-      <Text
-        style={[styles.rowValue, { color: colors.text }]}
-        numberOfLines={1}
-      >
-        {value}
-      </Text>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   field: {
     marginBottom: 18,
@@ -250,29 +152,6 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 0,
     borderBottomWidth: 1,
-  },
-  switchRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderTopWidth: 1,
-    marginTop: 16,
-    paddingTop: 16,
-  },
-  switchText: {
-    flex: 1,
-    paddingRight: 12,
-  },
-  switchLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  switchHint: {
-    fontFamily: 'monospace',
-    fontSize: 9,
-    letterSpacing: 0.9,
-    textTransform: 'uppercase',
-    marginTop: 3,
   },
   preview: {
     borderRadius: 4,
@@ -299,41 +178,5 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
     textTransform: 'uppercase',
     marginTop: 8,
-  },
-  table: {
-    borderTopWidth: 1,
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-  },
-  rowLast: {
-    borderBottomWidth: 0,
-  },
-  rowLabel: {
-    fontFamily: 'monospace',
-    fontSize: 9,
-    letterSpacing: 1,
-    textTransform: 'uppercase',
-  },
-  rowValue: {
-    flexShrink: 1,
-    fontSize: 12,
-    textAlign: 'right',
-  },
-  footer: {
-    marginTop: 28,
-    gap: 12,
-  },
-  notice: {
-    fontFamily: 'monospace',
-    fontSize: 10,
-    letterSpacing: 1,
-    textTransform: 'uppercase',
-    textAlign: 'center',
   },
 });

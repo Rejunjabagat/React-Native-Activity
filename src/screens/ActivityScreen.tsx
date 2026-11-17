@@ -3,11 +3,10 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { AppHeader } from '../components/AppHeader';
-import { MetricsStrip } from '../components/MetricsStrip';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { ScreenContainer } from '../components/ScreenContainer';
 import { SectionHeading } from '../components/SectionHeading';
-import { getActivityById } from '../data/activities';
+import { getEntryById } from '../data/activities';
 import type { RootStackParamList } from '../navigation/types';
 import { useAppTheme } from '../theme/ThemeContext';
 
@@ -15,34 +14,34 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Activity'>;
 
 export function ActivityScreen({ navigation, route }: Props) {
   const { colors } = useAppTheme();
-  const activity = getActivityById(route.params.id);
+  const entry = getEntryById(route.params.id);
 
   // Local, screen-specific state: the reviewer's checklist.
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [seconds, setSeconds] = useState(0);
 
-  // useEffect with cleanup — a small "time on screen" counter.
+  // useEffect with cleanup — time spent on this screen.
   useEffect(() => {
     const timer = setInterval(() => setSeconds(value => value + 1), 1000);
     return () => clearInterval(timer);
   }, []);
 
-  const requirements = activity?.requirements ?? [];
+  const requirements = entry?.requirements ?? [];
   const doneCount = requirements.filter(item => checked[item]).length;
   const progress = requirements.length ? doneCount / requirements.length : 0;
 
-  const formattedTime = useMemo(() => {
+  const elapsed = useMemo(() => {
     const minutes = Math.floor(seconds / 60);
     const rest = seconds % 60;
     return `${minutes}:${rest.toString().padStart(2, '0')}`;
   }, [seconds]);
 
-  if (!activity) {
+  if (!entry) {
     return (
       <ScreenContainer>
-        <AppHeader kicker="Activity" title="Not found" onBack={navigation.goBack} />
-        <Text style={[styles.body, { color: colors.textMuted }]}>
-          This entry does not exist yet.
+        <AppHeader title="Not found" onBack={navigation.goBack} />
+        <Text style={[styles.description, { color: colors.textMuted }]}>
+          This entry does not exist.
         </Text>
       </ScreenContainer>
     );
@@ -51,65 +50,60 @@ export function ActivityScreen({ navigation, route }: Props) {
   return (
     <ScreenContainer>
       <AppHeader
-        kicker={`Activity ${activity.code}`}
-        title={activity.title}
-        subtitle={activity.subtitle}
+        kicker={entry.title}
+        title={entry.subtitle}
         onBack={navigation.goBack}
       />
 
       <Text style={[styles.description, { color: colors.text }]}>
-        {activity.description}
+        {entry.description}
       </Text>
 
-      <View style={styles.metrics}>
-        <MetricsStrip
-          items={[
-            {
-              label: 'status',
-              value:
-                activity.status === 'current'
-                  ? 'Active'
-                  : activity.status === 'done'
-                    ? 'Done'
-                    : 'Next',
-              accent:
-                activity.status === 'done'
-                  ? colors.success
-                  : activity.status === 'current'
-                    ? colors.accent
-                    : undefined,
-            },
-            {
-              label: 'reviewed',
-              value: `${doneCount}/${requirements.length}`,
-            },
-            { label: 'time', value: formattedTime },
+      <View style={[styles.counters, { borderTopColor: colors.border, borderBottomColor: colors.border }]}>
+        <View style={styles.counter}>
+          <Text style={[styles.counterValue, { color: colors.text }]}>
+            {`${doneCount}/${requirements.length}`}
+          </Text>
+          <Text style={[styles.counterLabel, { color: colors.textMuted }]}>
+            reviewed
+          </Text>
+        </View>
+        <View
+          style={[
+            styles.counter,
+            styles.counterDivider,
+            { borderLeftColor: colors.border },
           ]}
-        />
+        >
+          <Text style={[styles.counterValue, { color: colors.text }]}>
+            {elapsed}
+          </Text>
+          <Text style={[styles.counterLabel, { color: colors.textMuted }]}>
+            on screen
+          </Text>
+        </View>
       </View>
 
       <SectionHeading
         index="01"
-        title="Checklist"
+        title="Requirements"
         hint="Tap a line to mark it reviewed"
       />
 
-      <View style={styles.progressRow}>
-        <View style={[styles.track, { backgroundColor: colors.surfaceAlt }]}>
-          <View
-            style={[
-              styles.fill,
-              {
-                width: `${Math.round(progress * 100)}%`,
-                backgroundColor: colors.success,
-              },
-            ]}
-          />
-        </View>
-        <Text style={[styles.progressText, { color: colors.textMuted }]}>
-          {Math.round(progress * 100)}%
-        </Text>
+      <View style={[styles.track, { backgroundColor: colors.surfaceAlt }]}>
+        <View
+          style={[
+            styles.fill,
+            {
+              width: `${Math.round(progress * 100)}%`,
+              backgroundColor: colors.success,
+            },
+          ]}
+        />
       </View>
+      <Text style={[styles.percent, { color: colors.textMuted }]}>
+        {`${Math.round(progress * 100)}% complete`}
+      </Text>
 
       <View>
         {requirements.map((item, index) => {
@@ -192,27 +186,48 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     marginTop: 18,
   },
-  metrics: {
-    marginTop: 22,
-  },
-  progressRow: {
+  counters: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    marginBottom: 4,
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    marginTop: 22,
+    paddingVertical: 14,
+  },
+  counter: {
+    flex: 1,
+    minWidth: 0,
+  },
+  counterDivider: {
+    borderLeftWidth: 1,
+    paddingLeft: 14,
+  },
+  counterValue: {
+    fontFamily: 'serif',
+    fontSize: 22,
+    fontWeight: '700',
+    letterSpacing: -0.3,
+    fontVariant: ['tabular-nums'],
+  },
+  counterLabel: {
+    fontFamily: 'monospace',
+    fontSize: 9,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    marginTop: 4,
   },
   track: {
-    flex: 1,
     height: 3,
+    marginBottom: 8,
   },
   fill: {
     height: 3,
   },
-  progressText: {
+  percent: {
     fontFamily: 'monospace',
-    fontSize: 10,
+    fontSize: 9,
     letterSpacing: 0.8,
-    fontVariant: ['tabular-nums'],
+    textTransform: 'uppercase',
+    marginBottom: 6,
   },
   row: {
     flexDirection: 'row',
@@ -242,10 +257,6 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 13,
     lineHeight: 19,
-  },
-  body: {
-    fontSize: 14,
-    lineHeight: 21,
   },
   actions: {
     marginTop: 26,

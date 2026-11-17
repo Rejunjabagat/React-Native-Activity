@@ -1,114 +1,71 @@
-export type Activity = {
+export type EntryStatus = 'open' | 'planned';
+
+export type Entry = {
   id: string;
-  code: string;
   title: string;
   subtitle: string;
-  accent: string;
-  status: 'done' | 'current' | 'upcoming';
+  status: EntryStatus;
+  /** Which screen the dashboard card opens; null for entries not built yet. */
+  target: 'activity' | 'settings' | null;
   description: string;
   requirements: string[];
 };
 
-export const ACTIVITIES: Activity[] = [
-  {
-    id: 'activity-1',
-    code: '01',
-    title: 'Environment Setup',
-    subtitle: 'RN CLI · JDK 17 · Android SDK',
-    accent: '#5F7D6E',
-    status: 'done',
-    description:
-      'Installed and checked the toolchain: Node, JDK 17, Android SDK, an emulator and a hardware accelerator. A debug build installs and runs on the emulator.',
-    requirements: [
-      'Node.js and npm installed',
-      'JDK 17 set through JAVA_HOME',
-      'Android SDK with platform 36',
-      'Emulator boots and installs the build',
-    ],
-  },
-  {
-    id: 'activity-2',
-    code: '02',
-    title: 'Core Components',
-    subtitle: 'View · Text · Image · Pressable',
-    accent: '#6B7F55',
-    status: 'done',
-    description:
-      'Built small screens out of the core components and moved every repeated piece into its own file with typed props.',
-    requirements: [
-      'Text, View and Image used in a layout',
-      'Pressable with pressed-state feedback',
-      'Props typed with TypeScript',
-      'Styles kept outside the component body',
-    ],
-  },
-  {
-    id: 'activity-3',
-    code: '03',
-    title: 'Flexbox Layout',
-    subtitle: 'flex · direction · alignment',
-    accent: '#9E512C',
-    status: 'done',
-    description:
-      'Rebuilt the layouts with Flexbox only, no fixed widths, then checked them at several screen sizes with nothing clipped at the edges.',
-    requirements: [
-      'flexDirection and flexWrap used on purpose',
-      'justifyContent and alignItems control spacing',
-      'ScrollView stops vertical overflow',
-      'Layout survives rotation without clipping',
-    ],
-  },
-  {
-    id: 'activity-4',
-    code: '04',
-    title: 'State and Events',
-    subtitle: 'useState · useEffect · lists',
-    accent: '#8A6A3B',
-    status: 'done',
-    description:
-      'Local interaction on one screen: counters, a controlled text field, a list with stable keys and a timer that cleans itself up.',
-    requirements: [
-      'useState for local screen state',
-      'useEffect for lifecycle side effects',
-      'List rendered with stable keys',
-      'Controlled TextInput with validation',
-    ],
-  },
+/**
+ * The dashboard menu. Activity #5 is the only activity that exists so far;
+ * the other entries are placeholders for the laboratories and the final
+ * project that this app is meant to collect.
+ */
+export const ENTRIES: Entry[] = [
   {
     id: 'activity-5',
-    code: '05',
-    title: 'Navigation and Global State',
-    subtitle: 'Stack navigation · Context API',
-    accent: '#1F4B3E',
-    status: 'current',
+    title: 'Activity #5',
+    subtitle: 'Multi-screen React Native app',
+    status: 'open',
+    target: 'activity',
     description:
-      'The shell for the rest of the semester. Three screens on a native stack, a small component library, a grid that re-flows by width, and the theme plus profile kept in one context.',
+      'The app required for this activity: a dashboard that works as a menu, reusable components, local state on a screen, and global preferences shared by the whole app.',
     requirements: [
-      'Multi-screen navigation with a Home dashboard',
-      'Reusable cards, buttons and headers',
-      'Flexbox grid with no overflow at any width',
-      'React Context API holds the theme',
-      'Theme and profile name update everywhere at once',
+      'Initialize a React Native project',
+      'Build multi-screen navigation',
+      'Make the Home dashboard act as a menu',
+      'Use reusable components for static elements',
+      'Handle local interaction with useState and useEffect',
+      'Use Flexbox so no screen overflows',
+      'Share a global parameter through Context API',
     ],
+  },
+  {
+    id: 'settings',
+    title: 'Settings',
+    subtitle: 'Theme and profile',
+    status: 'open',
+    target: 'settings',
+    description:
+      'Where the two global parameters are changed. The dashboard repaints as soon as either value changes.',
+    requirements: [],
+  },
+  {
+    id: 'activity-6',
+    title: 'Activity #6',
+    subtitle: 'Reserved for the next laboratory activity',
+    status: 'planned',
+    target: null,
+    description: 'This screen will be added after the next laboratory activity.',
+    requirements: [],
   },
   {
     id: 'final-project',
-    code: '06',
     title: 'Final Project',
-    subtitle: 'Compilation app',
-    accent: '#5B5B4F',
-    status: 'upcoming',
+    subtitle: 'Compilation of all laboratory activities',
+    status: 'planned',
+    target: null,
     description:
-      'The same dashboard becomes the entry point for the final requirement: each later activity is added as a screen behind the index.',
-    requirements: [
-      'All activities reachable from one dashboard',
-      'One design language across screens',
-      'Global settings applied app-wide',
-      'Repository and demo recording submitted',
-    ],
+      'The final requirement will be added to this dashboard once it is assigned.',
+    requirements: [],
   },
 ];
 
-export function getActivityById(id: string): Activity | undefined {
-  return ACTIVITIES.find(activity => activity.id === id);
+export function getEntryById(id: string): Entry | undefined {
+  return ENTRIES.find(entry => entry.id === id);
 }

@@ -76,3 +76,6 @@ yarn-error.log
 
 # local build artifacts
 /dist
+
+# demo recording
+*.mp4

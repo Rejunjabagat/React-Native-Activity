@@ -3,23 +3,18 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { ActivityCard } from '../components/ActivityCard';
-import { MetricsStrip } from '../components/MetricsStrip';
-import { PrimaryButton } from '../components/PrimaryButton';
 import { ScreenContainer } from '../components/ScreenContainer';
 import { SectionHeading } from '../components/SectionHeading';
-import { SegmentedControl } from '../components/SegmentedControl';
 import { TextButton } from '../components/TextButton';
-import { ACTIVITIES } from '../data/activities';
+import { ENTRIES } from '../data/activities';
 import { useResponsive } from '../hooks/useResponsive';
 import type { RootStackParamList } from '../navigation/types';
-import { useAppTheme, type ThemeMode } from '../theme/ThemeContext';
+import { useAppTheme } from '../theme/ThemeContext';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
-const pad = (value: number) => String(value).padStart(2, '0');
-
 export function HomeScreen({ navigation }: Props) {
-  const { colors, profile, mode, setMode } = useAppTheme();
+  const { colors, profile } = useAppTheme();
   const {
     columns,
     gutter,
@@ -29,9 +24,18 @@ export function HomeScreen({ navigation }: Props) {
     isTablet,
   } = useResponsive();
 
-  const done = ACTIVITIES.filter(item => item.status === 'done').length;
-  const pending = ACTIVITIES.length - done;
-  const current = ACTIVITIES.find(item => item.status === 'current') ?? ACTIVITIES[0];
+  const openEntry = (id: string) => {
+    const entry = ENTRIES.find(item => item.id === id);
+
+    if (entry?.target === 'settings') {
+      navigation.navigate('Settings');
+      return;
+    }
+
+    if (entry?.target === 'activity') {
+      navigation.navigate('Activity', { id: entry.id });
+    }
+  };
 
   return (
     <ScreenContainer contentStyle={{ paddingHorizontal: horizontalPadding }}>
@@ -62,68 +66,16 @@ export function HomeScreen({ navigation }: Props) {
           {profile.name || 'Student'}
         </Text>
         <Text style={[styles.program, { color: colors.textMuted }]}>
-          {profile.course || 'BSCS'} · Activity 05
+          {profile.course || 'BSCS'}
         </Text>
-      </View>
-
-      <View style={styles.appearanceRow}>
-        <Text style={[styles.fieldLabel, { color: colors.textMuted }]}>
-          Appearance
+        <Text style={[styles.lede, { color: colors.textMuted }]}>
+          Open an entry below. The theme and the name above come from Settings
+          and change on every screen at once.
         </Text>
-        <View style={styles.appearanceControl}>
-          <SegmentedControl
-            options={[
-              { value: 'light', label: 'Light' },
-              { value: 'dark', label: 'Dark' },
-            ]}
-            value={mode}
-            onChange={next => setMode(next as ThemeMode)}
-          />
-        </View>
-      </View>
-
-      <SectionHeading index="01" title="Current focus" />
-      <View
-        style={[
-          styles.focus,
-          {
-            backgroundColor: colors.surface,
-            borderColor: colors.border,
-            borderLeftColor: colors.primary,
-          },
-        ]}
-      >
-        <Text style={[styles.focusMeta, { color: colors.textMuted }]}>
-          {current.code} · {current.subtitle}
-        </Text>
-        <Text style={[styles.focusTitle, { color: colors.text }]}>
-          {current.title}
-        </Text>
-        <Text style={[styles.focusBody, { color: colors.textMuted }]}>
-          {current.description}
-        </Text>
-        <View style={styles.focusAction}>
-          <PrimaryButton
-            label="Open activity"
-            onPress={() =>
-              navigation.navigate('Activity', { id: current.id })
-            }
-          />
-        </View>
-      </View>
-
-      <View style={styles.metrics}>
-        <MetricsStrip
-          items={[
-            { label: 'entries', value: pad(ACTIVITIES.length) },
-            { label: 'done', value: pad(done), accent: colors.success },
-            { label: 'pending', value: pad(pending), accent: colors.accent },
-          ]}
-        />
       </View>
 
       <SectionHeading
-        index="02"
+        index="01"
         title="Index"
         hint={`${columns} column${columns > 1 ? 's' : ''} · ${Math.round(
           width,
@@ -131,26 +83,22 @@ export function HomeScreen({ navigation }: Props) {
       />
 
       <View style={[styles.grid, { gap: gutter }]}>
-        {ACTIVITIES.map(activity => (
+        {ENTRIES.map((entry, index) => (
           <ActivityCard
-            key={activity.id}
-            activity={activity}
+            key={entry.id}
+            entry={entry}
+            index={index}
             width={cardWidth}
-            onPress={() =>
-              navigation.navigate('Activity', { id: activity.id })
+            onPress={
+              entry.target ? () => openEntry(entry.id) : undefined
             }
           />
         ))}
       </View>
 
-      <View style={[styles.footer, { borderTopColor: colors.border }]}>
-        <Text style={[styles.footerText, { color: colors.textMuted }]}>
-          Tap an entry to open its screen.
-        </Text>
-        <Text style={[styles.footerText, { color: colors.textMuted }]}>
-          {profile.name} · {profile.course}
-        </Text>
-      </View>
+      <Text style={[styles.footer, { color: colors.textMuted }]}>
+        Activity #5 · {profile.name} · {profile.course}
+      </Text>
     </ScreenContainer>
   );
 }
@@ -197,66 +145,20 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     marginTop: 8,
   },
-  appearanceRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginTop: 22,
-  },
-  fieldLabel: {
-    fontFamily: 'monospace',
-    fontSize: 9,
-    letterSpacing: 1.2,
-    textTransform: 'uppercase',
-  },
-  appearanceControl: {
-    flex: 1,
-  },
-  focus: {
-    borderRadius: 4,
-    borderWidth: 1,
-    borderLeftWidth: 3,
-    padding: 18,
-  },
-  focusMeta: {
-    fontFamily: 'monospace',
-    fontSize: 9,
-    letterSpacing: 1,
-    textTransform: 'uppercase',
-  },
-  focusTitle: {
-    fontFamily: 'serif',
-    fontSize: 22,
-    fontWeight: '700',
-    letterSpacing: -0.3,
-    marginTop: 10,
-    lineHeight: 27,
-  },
-  focusBody: {
+  lede: {
     fontSize: 13,
     lineHeight: 20,
-    marginTop: 8,
-  },
-  focusAction: {
-    marginTop: 18,
-  },
-  metrics: {
-    marginTop: 20,
+    marginTop: 14,
   },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
   },
   footer: {
-    borderTopWidth: 1,
-    marginTop: 32,
-    paddingTop: 12,
-    gap: 4,
-  },
-  footerText: {
     fontFamily: 'monospace',
     fontSize: 9,
     letterSpacing: 0.8,
     textTransform: 'uppercase',
+    marginTop: 32,
   },
 });

@@ -1,63 +1,35 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import type { Activity } from '../data/activities';
+import type { Entry } from '../data/activities';
 import { useAppTheme } from '../theme/ThemeContext';
 
 type Props = {
-  activity: Activity;
+  entry: Entry;
+  index: number;
   width: number;
-  onPress: () => void;
-};
-
-const STATUS_LABEL: Record<Activity['status'], string> = {
-  done: 'Done',
-  current: 'In progress',
-  upcoming: 'Upcoming',
+  onPress?: () => void;
 };
 
 /**
- * Catalogue card. Width comes from the grid so the card never overflows;
- * the current activity is marked with a tinted wash and a left ink bar.
+ * Dashboard menu card. Width is supplied by the grid, so it cannot overflow.
+ * Entries that have not been built yet are rendered flat and not pressable.
  */
-export function ActivityCard({ activity, width, onPress }: Props) {
+export function ActivityCard({ entry, index, width, onPress }: Props) {
   const { colors } = useAppTheme();
 
-  const statusColor =
-    activity.status === 'done'
-      ? colors.success
-      : activity.status === 'current'
-        ? colors.accent
-        : colors.textMuted;
+  const isOpen = entry.status === 'open';
+  const statusLabel = isOpen ? 'Available' : 'Planned';
+  const statusColor = isOpen ? colors.accent : colors.textMuted;
 
-  const isCurrent = activity.status === 'current';
-
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={`${activity.title}, ${STATUS_LABEL[activity.status]}`}
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.card,
-        {
-          width,
-          backgroundColor: isCurrent ? colors.tint : colors.surface,
-          borderColor: isCurrent ? colors.primary : colors.border,
-          borderLeftWidth: isCurrent ? 3 : 1,
-          borderLeftColor: isCurrent ? colors.primary : colors.border,
-          opacity: pressed ? 0.7 : 1,
-        },
-      ]}
-    >
+  const body = (
+    <>
       <View style={styles.topRow}>
         <Text style={[styles.code, { color: colors.textMuted }]}>
-          {activity.code}
+          {String(index + 1).padStart(2, '0')}
         </Text>
-        <Text
-          style={[styles.status, { color: statusColor }]}
-          numberOfLines={1}
-        >
-          {STATUS_LABEL[activity.status]}
+        <Text style={[styles.status, { color: statusColor }]}>
+          {statusLabel}
         </Text>
       </View>
 
@@ -66,7 +38,7 @@ export function ActivityCard({ activity, width, onPress }: Props) {
         numberOfLines={3}
         ellipsizeMode="tail"
       >
-        {activity.title}
+        {entry.title}
       </Text>
 
       <Text
@@ -74,8 +46,46 @@ export function ActivityCard({ activity, width, onPress }: Props) {
         numberOfLines={2}
         ellipsizeMode="tail"
       >
-        {activity.subtitle}
+        {entry.subtitle}
       </Text>
+    </>
+  );
+
+  if (!onPress) {
+    return (
+      <View
+        style={[
+          styles.card,
+          {
+            width,
+            backgroundColor: 'transparent',
+            borderColor: colors.border,
+          },
+        ]}
+      >
+        {body}
+      </View>
+    );
+  }
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`${entry.title}, ${statusLabel}`}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.card,
+        {
+          width,
+          backgroundColor: colors.surface,
+          borderColor: colors.border,
+          borderLeftWidth: 3,
+          borderLeftColor: colors.primary,
+          opacity: pressed ? 0.7 : 1,
+        },
+      ]}
+    >
+      {body}
     </Pressable>
   );
 }

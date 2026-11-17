@@ -31,7 +31,7 @@ const renderTree = (element: React.ReactElement) => {
 const textOf = (renderer: ReactTestRenderer.ReactTestRenderer) =>
   JSON.stringify(renderer.toJSON());
 
-/** Press the row that contains the given label. */
+/** Press the checklist row that contains the given label. */
 const pressRow = (
   renderer: ReactTestRenderer.ReactTestRenderer,
   label: string,
@@ -56,8 +56,8 @@ const pressRow = (
   act(() => target!.props.onPress());
 };
 
-describe('screens render', () => {
-  it('shows the profile and every catalogue entry on the dashboard', () => {
+describe('screens', () => {
+  it('renders the dashboard menu with the profile name', () => {
     const renderer = renderTree(
       <HomeScreen
         navigation={navigation}
@@ -69,13 +69,16 @@ describe('screens render', () => {
 
     expect(text).toContain('Rejun Q. Jabagat');
     expect(text).toContain('BSCS 4-A');
-    expect(text).toContain('Navigation and Global State');
+    expect(text).toContain('Activity #5');
+    expect(text).toContain('Settings');
     expect(text).toContain('Final Project');
+    expect(text).toContain('Available');
+    expect(text).toContain('Planned');
 
     act(() => renderer.unmount());
   });
 
-  it('updates the dashboard greeting when the name is typed in Settings', () => {
+  it('updates the dashboard when the name is typed in Settings', () => {
     const renderer = renderTree(
       <>
         <HomeScreen
@@ -94,15 +97,15 @@ describe('screens render', () => {
 
     act(() => inputs[0].props.onChangeText('Maria Santos'));
 
-    // Settings preview, dashboard greeting and dashboard footer all read the
-    // same context value, so the new name must appear several times.
+    // Dashboard greeting, dashboard footer and Settings preview all read the
+    // same context value, so the new name must appear three times.
     const count = textOf(renderer).split('Maria Santos').length - 1;
     expect(count).toBeGreaterThanOrEqual(3);
 
     act(() => renderer.unmount());
   });
 
-  it('tracks checklist progress on an activity screen', () => {
+  it('tracks the requirements checklist on the activity screen', () => {
     const renderer = renderTree(
       <ActivityScreen
         navigation={navigation}
@@ -112,15 +115,15 @@ describe('screens render', () => {
       />,
     );
 
-    expect(textOf(renderer)).toContain('0/5');
+    expect(textOf(renderer)).toContain('0/7');
     expect(textOf(renderer)).toContain('0%');
 
-    pressRow(renderer, 'Multi-screen navigation with a Home dashboard');
-    pressRow(renderer, 'Reusable cards, buttons and headers');
+    pressRow(renderer, 'Initialize a React Native project');
+    pressRow(renderer, 'Build multi-screen navigation');
 
     const text = textOf(renderer);
-    expect(text).toContain('2/5');
-    expect(text).toContain('40%');
+    expect(text).toContain('2/7');
+    expect(text).toContain('29%');
 
     act(() => renderer.unmount());
   });
